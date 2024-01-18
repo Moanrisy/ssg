@@ -4,12 +4,17 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sync"
 
 	"github.com/gorilla/websocket"
 	"github.com/moanrisy/ssg/shared"
 )
 
-var upgrader = websocket.Upgrader{}
+var (
+	upgrader = websocket.Upgrader{}
+	countMu  sync.Mutex
+	count    int
+)
 
 func echo(w http.ResponseWriter, r *http.Request) {
 	c, err := upgrader.Upgrade(w, r, nil)
@@ -24,7 +29,6 @@ func echo(w http.ResponseWriter, r *http.Request) {
 
 	c.WriteMessage(websocket.TextMessage, []byte("Hello client!"))
 
-	count := 0
 	for {
 
 		var message shared.Message
@@ -35,8 +39,11 @@ func echo(w http.ResponseWriter, r *http.Request) {
 			fmt.Printf("Message from client: %v", message.Content)
 		case shared.INPUT:
 			fmt.Printf("From client: %v", message.Content)
+
+			countMu.Lock()
 			count++
 			fmt.Println("Input received:", count)
+			countMu.Unlock()
 		}
 
 		fmt.Println()
