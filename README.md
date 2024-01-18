@@ -3,8 +3,11 @@
 ![](https://raw.githubusercontent.com/Moanrisy/ssg/main/initial-concept.jpeg)
 
 The initial idea reminded me of paper game that I was played on elementary school with my friend.
+
 1 folded paper with pen is the only thing that required.
-Each player draw ship in one side of the paper, then take turn to make guess by bold coloring the paper then flip it, so it leave remark.
+
+Each player draw ship in one side of the paper, then take turn to make guess by bold coloring the paper then fold it and put some pressure so it leave remark.
+
 If the remark (bold coloring) touch the other side of paper and correctly guess the enemy ship position, then it destroyed.
 
 ## Reason why the name ssg
