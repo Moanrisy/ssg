@@ -1,6 +1,7 @@
 ## Demo v0.1.0
 
-[![asciicast](https://as2.ftcdn.net/v2/jpg/02/19/74/55/1000_F_219745509_xIRJwJ24dnWPAd8P5hMN9MHzXDNIjQCX.jpg)](https://github.com/Moanrisy/ssg/blob/main/ssg-v0.2.mp4)
+https://github.com/Moanrisy/ssg/assets/17421945/7dc3f61d-b9da-4830-ab92-e8df458a7d3d
+
 
 ## Create a CLI tools for a game of number picking.
 
