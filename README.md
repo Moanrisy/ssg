@@ -1,3 +1,7 @@
+## Demo v0.1.0
+
+[![asciicast](https://asciinema.org/a/113463.png)](https://github.com/Moanrisy/ssg/blob/main/ssg-v0.2.mp4)
+
 ## Create a CLI tools for a game of number picking.
 
 ![](https://raw.githubusercontent.com/Moanrisy/ssg/main/initial-concept.jpeg)
