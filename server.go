@@ -42,10 +42,11 @@ type PlayerState struct {
 }
 
 var (
-	upgrader = websocket.Upgrader{}
-	countMu  sync.Mutex
-	count    int
-	Players  [2]PlayerState
+	upgrader  = websocket.Upgrader{}
+	countMu   sync.Mutex
+	count     int
+	Players   [2]PlayerState
+	gameState = NewGameState()
 )
 
 func registerPlayer(c *websocket.Conn) {
@@ -176,8 +177,6 @@ func gameCompleted() {
 	fmt.Println("Game completed")
 	os.Exit(0)
 }
-
-var gameState = NewGameState()
 
 func echo(w http.ResponseWriter, r *http.Request) {
 	// Upgrade initial GET request to a websocket
