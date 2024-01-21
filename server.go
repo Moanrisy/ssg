@@ -91,6 +91,7 @@ func playerSendInput(playerTurn player, message shared.Message) {
 var gameState = NewGameState()
 
 func echo(w http.ResponseWriter, r *http.Request) {
+	// Upgrade initial GET request to a websocket
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Print("upgrade:", err)
@@ -122,8 +123,6 @@ func echo(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if gameState.previousPlayerTurn == gameState.playerTurn {
-				fmt.Printf("prev %v\t curr %v\n", gameState.previousPlayerTurn, gameState.playerTurn)
-				fmt.Printf("adr prev %v\t adr curr %v\n", &gameState.previousPlayerTurn, &gameState.playerTurn)
 				c.WriteMessage(websocket.TextMessage, []byte("It's not your turn!"))
 			} else {
 				fmt.Println("Player success send input")
