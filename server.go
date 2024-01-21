@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"sync"
 
 	"github.com/gorilla/websocket"
@@ -106,19 +107,23 @@ func playerSendInput(playerTurn player, message shared.Message) {
 }
 
 func printPickedNumbersAsReference() {
-	fmt.Println("========================")
+	line := strings.Repeat("=", 100)
+	fmt.Println(line)
+
 	fmt.Println("Player", Players[PLAYER1].playerNumber+1, "choosen input is: ")
 	for _, v := range Players[PLAYER1].input {
-		fmt.Println(v)
+		fmt.Print(v)
+		fmt.Print("\t|\t")
 	}
 	fmt.Println()
-	fmt.Println("========================")
+	fmt.Println(line)
 	fmt.Println("Player", Players[PLAYER2].playerNumber+1, "choosen input is: ")
 	for _, v := range Players[PLAYER2].input {
-		fmt.Println(v)
+		fmt.Print(v)
+		fmt.Print("\t|\t")
 	}
 	fmt.Println()
-	fmt.Println("========================")
+	fmt.Println(line)
 }
 
 func printGameCompleted() {
@@ -152,6 +157,7 @@ func echo(w http.ResponseWriter, r *http.Request) {
 	welcomeMessage(c)
 
 	for {
+
 		var message shared.Message
 
 		err := c.ReadJSON(&message)
@@ -184,6 +190,7 @@ func echo(w http.ResponseWriter, r *http.Request) {
 		fmt.Println()
 
 		if len(Players[PLAYER1].input) > 0 {
+			shared.ClearTerminal()
 			printPickedNumbersAsReference()
 			printGameCompleted()
 		}
