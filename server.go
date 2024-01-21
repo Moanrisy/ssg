@@ -106,6 +106,20 @@ func playerSendInput(playerTurn player, message shared.Message) {
 	countMu.Unlock()
 }
 
+func isNumberPicked(message shared.Message) bool {
+	for _, v := range Players[PLAYER1].input {
+		if message.Content == v {
+			return true
+		}
+	}
+	for _, v := range Players[PLAYER2].input {
+		if message.Content == v {
+			return true
+		}
+	}
+	return false
+}
+
 func printPickedNumbersAsReference() {
 	line := strings.Repeat("=", 100)
 	fmt.Println(line)
@@ -221,6 +235,10 @@ func echo(w http.ResponseWriter, r *http.Request) {
 			if gameState.previousPlayerTurn == gameState.playerTurn {
 				c.WriteMessage(websocket.TextMessage, []byte("It's not your turn!"))
 			} else {
+				if isNumberPicked(message) {
+					c.WriteMessage(websocket.TextMessage, []byte("Number already picked, please pick other number"))
+					break
+				}
 				playerSendInput(gameState.playerTurn, message)
 				gameState.playerWebsocketConn[gameState.previousPlayerTurn].WriteMessage(websocket.TextMessage, []byte("\nIt's your turn, please type input between 0-123"))
 				c.WriteMessage(websocket.TextMessage, []byte("Waiting other player turn..."))
