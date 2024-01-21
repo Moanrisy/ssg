@@ -120,26 +120,6 @@ func isNumberPicked(message shared.Message) bool {
 	return false
 }
 
-func printPickedNumbersAsReference() {
-	line := strings.Repeat("=", 100)
-	fmt.Println(line)
-
-	fmt.Println("Player", Players[PLAYER1].playerNumber+1, "choosen input is: ")
-	for _, v := range Players[PLAYER1].input {
-		fmt.Print(v)
-		fmt.Print("\t|\t")
-	}
-	fmt.Println()
-	fmt.Println(line)
-	fmt.Println("Player", Players[PLAYER2].playerNumber+1, "choosen input is: ")
-	for _, v := range Players[PLAYER2].input {
-		fmt.Print(v)
-		fmt.Print("\t|\t")
-	}
-	fmt.Println()
-	fmt.Println(line)
-}
-
 func formatPickedNumbersAsReference(playerOne bool, playerTwo bool) string {
 	start := 0
 	end := 0
