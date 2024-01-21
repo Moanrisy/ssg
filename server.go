@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"sync"
 
 	"github.com/gorilla/websocket"
@@ -160,7 +161,8 @@ func echo(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				fmt.Println("Error closing player 2 websocket connection")
 			}
-			return
+			fmt.Println("Game completed")
+			os.Exit(0)
 		}
 	}
 }
