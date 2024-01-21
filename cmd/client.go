@@ -21,6 +21,8 @@ var (
 )
 
 func main() {
+	shared.ClearTerminal()
+
 	fmt.Println("Client started")
 
 	interrupt := make(chan os.Signal, 1)
