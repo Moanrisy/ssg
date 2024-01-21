@@ -46,6 +46,26 @@ var (
 	Players  [2]PlayerState
 )
 
+func registerPlayer(c *websocket.Conn) {
+	fmt.Println("Client connected", c.RemoteAddr())
+	fmt.Println()
+	countMu.Lock()
+	if !gameState.playerReady[PLAYER1] {
+		gameState.playerReady[PLAYER1] = true
+		Players[PLAYER1].playerNumber = PLAYER1
+		Players[PLAYER1].idFromAddr = c.RemoteAddr().String()
+		gameState.playerWebsocketConn[PLAYER1] = c
+	} else if !gameState.playerReady[PLAYER2] {
+		gameState.playerReady[PLAYER2] = true
+		Players[PLAYER2].playerNumber = PLAYER2
+		Players[PLAYER2].idFromAddr = c.RemoteAddr().String()
+		gameState.playerWebsocketConn[PLAYER2] = c
+	} else {
+		fmt.Print("Maximum 2 players allowed!")
+	}
+	countMu.Unlock()
+}
+
 func welcomeMessage(c *websocket.Conn) {
 	var messageFrom string
 	switch c.RemoteAddr().String() {
@@ -78,24 +98,7 @@ func echo(w http.ResponseWriter, r *http.Request) {
 	}
 	defer c.Close()
 
-	fmt.Println("Client connected", c.RemoteAddr())
-	fmt.Println()
-	countMu.Lock()
-	if !gameState.playerReady[PLAYER1] {
-		gameState.playerReady[PLAYER1] = true
-		Players[PLAYER1].playerNumber = PLAYER1
-		Players[PLAYER1].idFromAddr = c.RemoteAddr().String()
-		gameState.playerWebsocketConn[PLAYER1] = c
-	} else if !gameState.playerReady[PLAYER2] {
-		gameState.playerReady[PLAYER2] = true
-		Players[PLAYER2].playerNumber = PLAYER2
-		Players[PLAYER2].idFromAddr = c.RemoteAddr().String()
-		gameState.playerWebsocketConn[PLAYER2] = c
-	} else {
-		fmt.Print("Maximum 2 players allowed!")
-	}
-	countMu.Unlock()
-
+	registerPlayer(c)
 	welcomeMessage(c)
 
 	for {
