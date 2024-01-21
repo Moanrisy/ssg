@@ -51,7 +51,7 @@ func main() {
 				close(closeChan)
 				return
 			}
-			fmt.Printf("Received message: %s\n", message)
+			fmt.Printf("%s\n", message)
 		}
 	}()
 
@@ -86,8 +86,6 @@ func main() {
 
 				// Check if the number is within the specified range
 				if number >= 0 && number <= 123 {
-					result := strconv.Itoa(number)
-					fmt.Printf("You entered: %s\n", result)
 					break
 				} else {
 					fmt.Println("Number out of range. Please enter a number between 0 and 123.")

@@ -89,7 +89,7 @@ func welcomeMessage(c *websocket.Conn) {
 	if player == PLAYER2 {
 		// additionalMessageAfterPlayer2Connected
 		// ToPlayer1
-		gameState.playerWebsocketConn[gameState.playerTurn].WriteMessage(websocket.TextMessage, []byte("Player 2 connected to the game.\nGame started.\n===================\nIt's your turn, please type input between 0-123"))
+		gameState.playerWebsocketConn[gameState.playerTurn].WriteMessage(websocket.TextMessage, []byte("Player 2 connected to the game.\n\nGame started.\n===================\nIt's your turn, please type input between 0-123"))
 		// ToPlayer2
 		c.WriteMessage(websocket.TextMessage, []byte("\nGame started.\n===================\nWaiting other player turn..."))
 	}
@@ -126,20 +126,61 @@ func printPickedNumbersAsReference() {
 	fmt.Println(line)
 }
 
-func printGameCompleted() {
-	if len(Players[PLAYER2].input) == 5 {
-		fmt.Println()
-		err := gameState.playerWebsocketConn[0].Close()
-		if err != nil {
-			fmt.Println("Error closing player 1 websocket connection")
-		}
-		gameState.playerWebsocketConn[1].Close()
-		if err != nil {
-			fmt.Println("Error closing player 2 websocket connection")
-		}
-		fmt.Println("Game completed")
-		os.Exit(0)
+func formatPickedNumbersAsReference(playerOne bool, playerTwo bool) string {
+	start := 0
+	end := 0
+	initSeparator := ""
+	separator := ""
+	lineSeparator := 0
+
+	if playerOne && playerTwo {
+		start = 0
+		end = 1
+		separator = "\t|\t"
+		initSeparator = "|\t"
+		lineSeparator = 105
+	} else if playerOne {
+		start = 0
+		end = 0
+		separator = " | "
+		initSeparator = " "
+		lineSeparator = 45
+	} else if playerTwo {
+		start = 1
+		end = 1
+		separator = " | "
+		initSeparator = " "
+		lineSeparator = 45
 	}
+
+	var result strings.Builder
+	line := strings.Repeat("=", lineSeparator)
+	fmt.Fprintln(&result, line)
+
+	for i := start; i <= end; i++ {
+		fmt.Fprintf(&result, "Player %d chosen input is:%v", Players[i].playerNumber+1, initSeparator)
+		for _, v := range Players[i].input {
+			fmt.Fprintf(&result, "%v%v", v, separator)
+		}
+		fmt.Fprintln(&result)
+		fmt.Fprintln(&result, line)
+	}
+
+	return result.String()
+}
+
+func gameCompleted() {
+	fmt.Println()
+	err := gameState.playerWebsocketConn[0].Close()
+	if err != nil {
+		fmt.Println("Error closing player 1 websocket connection")
+	}
+	gameState.playerWebsocketConn[1].Close()
+	if err != nil {
+		fmt.Println("Error closing player 2 websocket connection")
+	}
+	fmt.Println("Game completed")
+	os.Exit(0)
 }
 
 var gameState = NewGameState()
@@ -181,7 +222,7 @@ func echo(w http.ResponseWriter, r *http.Request) {
 				c.WriteMessage(websocket.TextMessage, []byte("It's not your turn!"))
 			} else {
 				playerSendInput(gameState.playerTurn, message)
-				gameState.playerWebsocketConn[gameState.previousPlayerTurn].WriteMessage(websocket.TextMessage, []byte("It's your turn, please type input between 0-123"))
+				gameState.playerWebsocketConn[gameState.previousPlayerTurn].WriteMessage(websocket.TextMessage, []byte("\nIt's your turn, please type input between 0-123"))
 				c.WriteMessage(websocket.TextMessage, []byte("Waiting other player turn..."))
 				gameState.previousPlayerTurn = gameState.playerTurn
 			}
@@ -189,10 +230,20 @@ func echo(w http.ResponseWriter, r *http.Request) {
 
 		fmt.Println()
 
+		// Print every input from player
 		if len(Players[PLAYER1].input) > 0 {
 			shared.ClearTerminal()
-			printPickedNumbersAsReference()
-			printGameCompleted()
+			formattedString := formatPickedNumbersAsReference(true, true)
+			fmt.Println(formattedString)
+		}
+
+		// Print at the end of the session to each player
+		if len(Players[PLAYER2].input) == 5 {
+			numbersPickedByPlayerOne := formatPickedNumbersAsReference(true, false)
+			numbersPickedByPlayerTwo := formatPickedNumbersAsReference(false, true)
+			gameState.playerWebsocketConn[0].WriteMessage(websocket.TextMessage, []byte(numbersPickedByPlayerOne))
+			gameState.playerWebsocketConn[1].WriteMessage(websocket.TextMessage, []byte(numbersPickedByPlayerTwo))
+			gameCompleted()
 		}
 	}
 }
