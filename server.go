@@ -46,6 +46,16 @@ func welcomeMessage(c *websocket.Conn) {
 	c.WriteMessage(websocket.TextMessage, []byte(welcomeMessage))
 }
 
+func playerSendInput(playerTurn player, message shared.Message) {
+	fmt.Printf("From player: %v\n", Players[playerTurn].playerNumber+1)
+	fmt.Printf("Input choosen: %v\n", message.Content)
+	countMu.Lock()
+	Players[playerTurn].input = append(Players[playerTurn].input, message.Content)
+	count++
+	fmt.Println("Input received:", count)
+	countMu.Unlock()
+}
+
 func echo(w http.ResponseWriter, r *http.Request) {
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -82,30 +92,21 @@ func echo(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
+		// set first turn to player 1
+		playerTurn := PLAYER1
+
 		switch message.Type {
 		case shared.MESSAGE:
 			fmt.Printf("Message from client: %v", message.Content)
 		case shared.INPUT:
-
 			switch c.RemoteAddr().String() {
 			case Players[PLAYER1].idFromAddr:
-				fmt.Printf("From player: %v\n", Players[PLAYER1].playerNumber+1)
-				fmt.Printf("Input choosen: %v\n", message.Content)
-				countMu.Lock()
-				Players[PLAYER1].input = append(Players[PLAYER1].input, message.Content)
-				count++
-				fmt.Println("Input received:", count)
-				countMu.Unlock()
+				playerTurn = PLAYER1
 			case Players[PLAYER2].idFromAddr:
-				fmt.Printf("From player: %v\n", Players[PLAYER2].playerNumber+1)
-				fmt.Printf("Input choosen: %v\n", message.Content)
-				countMu.Lock()
-				Players[PLAYER2].input = append(Players[PLAYER2].input, message.Content)
-				count++
-				fmt.Println("Input received:", count)
-				countMu.Unlock()
+				playerTurn = PLAYER2
 			}
 
+			playerSendInput(playerTurn, message)
 		}
 
 		fmt.Println()
