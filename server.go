@@ -34,6 +34,18 @@ var (
 	Players  [2]PlayerState
 )
 
+func welcomeMessage(c *websocket.Conn) {
+	var messageFrom string
+	switch c.RemoteAddr().String() {
+	case Players[PLAYER1].idFromAddr:
+		messageFrom = "Player 1"
+	case Players[PLAYER2].idFromAddr:
+		messageFrom = "Player 2"
+	}
+	welcomeMessage := "Welcome, you are " + messageFrom
+	c.WriteMessage(websocket.TextMessage, []byte(welcomeMessage))
+}
+
 func echo(w http.ResponseWriter, r *http.Request) {
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -58,7 +70,7 @@ func echo(w http.ResponseWriter, r *http.Request) {
 	}
 	countMu.Unlock()
 
-	c.WriteMessage(websocket.TextMessage, []byte("Hello client!"))
+	welcomeMessage(c)
 
 	for {
 
