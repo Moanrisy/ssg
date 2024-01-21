@@ -76,7 +76,12 @@ func echo(w http.ResponseWriter, r *http.Request) {
 
 		var message shared.Message
 
-		c.ReadJSON(&message)
+		err := c.ReadJSON(&message)
+		if err != nil {
+			fmt.Println("Client disconnected", c.RemoteAddr())
+			break
+		}
+
 		switch message.Type {
 		case shared.MESSAGE:
 			fmt.Printf("Message from client: %v", message.Content)
