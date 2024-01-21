@@ -24,6 +24,8 @@ func main() {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
+	closeChan := make(chan struct{})
+
 	// Connect to the WebSocket server
 	addr := "ws://localhost:8081/ws"
 	conn, _, err := websocket.DefaultDialer.Dial(addr, nil)
@@ -42,6 +44,7 @@ func main() {
 			_, message, err := conn.ReadMessage()
 			if err != nil {
 				log.Println(err)
+				close(closeChan)
 				return
 			}
 			fmt.Printf("Received message: %s\n", message)
@@ -63,6 +66,7 @@ func main() {
 			input, err := inputReader.ReadString('\n')
 			if err != nil {
 				log.Println(err)
+				close(closeChan)
 				return
 			}
 			inputChannel <- input
@@ -78,6 +82,12 @@ func main() {
 			if err != nil {
 				log.Println(err)
 			}
+			close(closeChan)
+			return
+
+		case <-closeChan:
+			fmt.Println("Connection closed by server")
+			fmt.Println("Thank you for playing")
 			return
 
 		case input := <-inputChannel:
