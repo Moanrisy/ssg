@@ -79,9 +79,8 @@ func main() {
 				log.Println(err)
 			}
 			return
-		case input := <-inputChannel:
-			fmt.Println(input)
 
+		case input := <-inputChannel:
 			messageMutex.Lock()
 			message.Content = input
 			message.Type = shared.INPUT
