@@ -6,9 +6,16 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"sync"
 
 	"github.com/gorilla/websocket"
 	"github.com/moanrisy/ssg/shared"
+)
+
+var (
+	messageMutex sync.Mutex
+	message      shared.Message
+	inputChannel chan string
 )
 
 func main() {
@@ -47,18 +54,44 @@ func main() {
 	message.Type = shared.MESSAGE
 	conn.WriteJSON(&message)
 
-	// Send input to the server
+	// Input need to use channel
+	// because bufio will block Interrupt signal (C-c to Interrupt is blocked until enter pressed)
+	inputChannel = make(chan string, 1)
+	go func() {
+		for {
+			inputReader := bufio.NewReader(os.Stdin)
+			input, err := inputReader.ReadString('\n')
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			inputChannel <- input
+		}
+	}()
+
+	// Interrupt with C-c or send input to server
 	for {
-		inputReader := bufio.NewReader(os.Stdin)
-		input, _ := inputReader.ReadString('\n')
-
-		message.Content = input
-		message.Type = shared.INPUT
-
-		err = conn.WriteJSON(&message)
-		if err != nil {
-			log.Println(err)
+		select {
+		case <-interrupt:
+			fmt.Println("Interrupt received, closing connection...")
+			err := conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+			if err != nil {
+				log.Println(err)
+			}
 			return
+		case input := <-inputChannel:
+			fmt.Println(input)
+
+			messageMutex.Lock()
+			message.Content = input
+			message.Type = shared.INPUT
+			messageMutex.Unlock()
+
+			err = conn.WriteJSON(&message)
+			if err != nil {
+				log.Println(err)
+				return
+			}
 		}
 	}
 }
