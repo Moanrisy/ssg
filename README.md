@@ -1,7 +1,6 @@
-## Demo v0.1.0
+## Demo v0.2.0
 
-https://github.com/Moanrisy/ssg/assets/17421945/7dc3f61d-b9da-4830-ab92-e8df458a7d3d
-
+https://github.com/Moanrisy/ssg/assets/17421945/2c9c0a77-7953-4bdd-8a5b-b68d96a87217
 
 ## Create a CLI tools for a game of number picking.
 
