@@ -124,7 +124,7 @@ func echo(w http.ResponseWriter, r *http.Request) {
 
 		err := c.ReadJSON(&message)
 		if err != nil {
-			fmt.Println("Client disconnected", c.RemoteAddr())
+			// fmt.Println("Client disconnected", c.RemoteAddr())
 			break
 		}
 
@@ -156,14 +156,15 @@ func echo(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("========================")
 		fmt.Println("Player", Players[PLAYER1].playerNumber+1, "choosen input is: ")
 		for _, v := range Players[PLAYER1].input {
-			fmt.Print(v)
+			fmt.Println(v)
 		}
 		fmt.Println()
 		fmt.Println("========================")
 		fmt.Println("Player", Players[PLAYER2].playerNumber+1, "choosen input is: ")
 		for _, v := range Players[PLAYER2].input {
-			fmt.Print(v)
+			fmt.Println(v)
 		}
+		fmt.Println()
 		fmt.Println("========================")
 		// }
 
