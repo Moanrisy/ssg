@@ -43,7 +43,7 @@ func main() {
 		for {
 			_, message, err := conn.ReadMessage()
 			if err != nil {
-				log.Println(err)
+				// log.Println(err)
 				close(closeChan)
 				return
 			}
