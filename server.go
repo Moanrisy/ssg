@@ -136,20 +136,32 @@ func echo(w http.ResponseWriter, r *http.Request) {
 
 		fmt.Println()
 
-		if len(Players[PLAYER1].input) == 5 {
-			fmt.Println("Player", Players[PLAYER1].playerNumber+1, "choosen input is: ")
-			for _, v := range Players[PLAYER1].input {
-				fmt.Print(v)
-			}
-			fmt.Println()
+		// if len(Players[PLAYER1].input) == 5 {
+		fmt.Println("========================")
+		fmt.Println("Player", Players[PLAYER1].playerNumber+1, "choosen input is: ")
+		for _, v := range Players[PLAYER1].input {
+			fmt.Print(v)
 		}
+		fmt.Println()
+		fmt.Println("========================")
+		fmt.Println("Player", Players[PLAYER2].playerNumber+1, "choosen input is: ")
+		for _, v := range Players[PLAYER2].input {
+			fmt.Print(v)
+		}
+		fmt.Println("========================")
+		// }
 
 		if len(Players[PLAYER2].input) == 5 {
-			fmt.Println("Player", Players[PLAYER2].playerNumber+1, "choosen input is: ")
-			for _, v := range Players[PLAYER2].input {
-				fmt.Print(v)
-			}
 			fmt.Println()
+			err := gameState.playerWebsocketConn[0].Close()
+			if err != nil {
+				fmt.Println("Error closing player 1 websocket connection")
+			}
+			gameState.playerWebsocketConn[1].Close()
+			if err != nil {
+				fmt.Println("Error closing player 2 websocket connection")
+			}
+			return
 		}
 	}
 }
