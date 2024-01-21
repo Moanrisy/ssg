@@ -6,6 +6,8 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/gorilla/websocket"
@@ -62,12 +64,32 @@ func main() {
 	inputChannel = make(chan string, 1)
 	go func() {
 		for {
-			inputReader := bufio.NewReader(os.Stdin)
-			input, err := inputReader.ReadString('\n')
-			if err != nil {
-				log.Println(err)
-				close(closeChan)
-				return
+			var input string
+			// Loop until selected input is valid number
+			for {
+				inputReader := bufio.NewReader(os.Stdin)
+				input, err = inputReader.ReadString('\n')
+				if err != nil {
+					fmt.Println("Error reading input:", err)
+					return
+				}
+
+				input = strings.TrimSpace(input)
+				number, err := strconv.Atoi(input)
+				// Check if input is not number
+				if err != nil {
+					fmt.Println("Invalid input. Please enter a valid number.")
+					continue
+				}
+
+				// Check if the number is within the specified range
+				if number >= 0 && number <= 123 {
+					result := strconv.Itoa(number)
+					fmt.Printf("You entered: %s\n", result)
+					break
+				} else {
+					fmt.Println("Number out of range. Please enter a number between 0 and 123.")
+				}
 			}
 			inputChannel <- input
 		}
