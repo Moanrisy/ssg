@@ -17,8 +17,20 @@ const (
 	PLAYER2
 )
 
-var GameState struct {
-	playerReady [2]bool
+type GameState struct {
+	playerWebsocketConn [2]*websocket.Conn
+	playerTurn          player
+	previousPlayerTurn  player
+	playerReady         [2]bool
+}
+
+func NewGameState() *GameState {
+	return &GameState{
+		playerWebsocketConn: [2]*websocket.Conn{nil, nil},
+		playerReady:         [2]bool{false, false},
+		playerTurn:          PLAYER1,
+		previousPlayerTurn:  PLAYER2,
+	}
 }
 
 type PlayerState struct {
@@ -56,6 +68,8 @@ func playerSendInput(playerTurn player, message shared.Message) {
 	countMu.Unlock()
 }
 
+var gameState = NewGameState()
+
 func echo(w http.ResponseWriter, r *http.Request) {
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -67,14 +81,16 @@ func echo(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Client connected", c.RemoteAddr())
 	fmt.Println()
 	countMu.Lock()
-	if !GameState.playerReady[PLAYER1] {
-		GameState.playerReady[PLAYER1] = true
+	if !gameState.playerReady[PLAYER1] {
+		gameState.playerReady[PLAYER1] = true
 		Players[PLAYER1].playerNumber = PLAYER1
 		Players[PLAYER1].idFromAddr = c.RemoteAddr().String()
-	} else if !GameState.playerReady[PLAYER2] {
-		GameState.playerReady[PLAYER2] = true
+		gameState.playerWebsocketConn[PLAYER1] = c
+	} else if !gameState.playerReady[PLAYER2] {
+		gameState.playerReady[PLAYER2] = true
 		Players[PLAYER2].playerNumber = PLAYER2
 		Players[PLAYER2].idFromAddr = c.RemoteAddr().String()
+		gameState.playerWebsocketConn[PLAYER2] = c
 	} else {
 		fmt.Print("Maximum 2 players allowed!")
 	}
@@ -83,7 +99,6 @@ func echo(w http.ResponseWriter, r *http.Request) {
 	welcomeMessage(c)
 
 	for {
-
 		var message shared.Message
 
 		err := c.ReadJSON(&message)
@@ -92,21 +107,28 @@ func echo(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
-		// set first turn to player 1
-		playerTurn := PLAYER1
-
 		switch message.Type {
 		case shared.MESSAGE:
 			fmt.Printf("Message from client: %v", message.Content)
 		case shared.INPUT:
 			switch c.RemoteAddr().String() {
 			case Players[PLAYER1].idFromAddr:
-				playerTurn = PLAYER1
+				gameState.playerTurn = PLAYER1
 			case Players[PLAYER2].idFromAddr:
-				playerTurn = PLAYER2
+				gameState.playerTurn = PLAYER2
 			}
 
-			playerSendInput(playerTurn, message)
+			if gameState.previousPlayerTurn == gameState.playerTurn {
+				fmt.Printf("prev %v\t curr %v\n", gameState.previousPlayerTurn, gameState.playerTurn)
+				fmt.Printf("adr prev %v\t adr curr %v\n", &gameState.previousPlayerTurn, &gameState.playerTurn)
+				c.WriteMessage(websocket.TextMessage, []byte("It's not your turn!"))
+			} else {
+				fmt.Println("Player success send input")
+				playerSendInput(gameState.playerTurn, message)
+				gameState.playerWebsocketConn[gameState.previousPlayerTurn].WriteMessage(websocket.TextMessage, []byte("It's your turn, please type input between 0-123"))
+				c.WriteMessage(websocket.TextMessage, []byte("Waiting other player turn..."))
+				gameState.previousPlayerTurn = gameState.playerTurn
+			}
 		}
 
 		fmt.Println()
