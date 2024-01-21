@@ -69,14 +69,30 @@ func registerPlayer(c *websocket.Conn) {
 
 func welcomeMessage(c *websocket.Conn) {
 	var messageFrom string
+	var player player
 	switch c.RemoteAddr().String() {
 	case Players[PLAYER1].idFromAddr:
 		messageFrom = "Player 1"
+		player = PLAYER1
 	case Players[PLAYER2].idFromAddr:
 		messageFrom = "Player 2"
+		player = PLAYER2
 	}
 	welcomeMessage := "Welcome, you are " + messageFrom
 	c.WriteMessage(websocket.TextMessage, []byte(welcomeMessage))
+
+	if player == PLAYER1 {
+		// additionalMessageAfterPlayer1Connected
+		gameState.playerWebsocketConn[gameState.playerTurn].WriteMessage(websocket.TextMessage, []byte("Waiting player 2 to join..."))
+	}
+
+	if player == PLAYER2 {
+		// additionalMessageAfterPlayer2Connected
+		// ToPlayer1
+		gameState.playerWebsocketConn[gameState.playerTurn].WriteMessage(websocket.TextMessage, []byte("Player 2 connected to the game.\nGame started.\n===================\nIt's your turn, please type input between 0-123"))
+		// ToPlayer2
+		c.WriteMessage(websocket.TextMessage, []byte("\nGame started.\n===================\nWaiting other player turn..."))
+	}
 }
 
 func playerSendInput(playerTurn player, message shared.Message) {
