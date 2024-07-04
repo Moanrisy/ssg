@@ -2,6 +2,12 @@
 
 https://github.com/Moanrisy/ssg/assets/17421945/2c9c0a77-7953-4bdd-8a5b-b68d96a87217
 
+## How to run
+### run the server
+`go run server.go`
+### run 2 client in separate terminal window
+`go run cmd/client.go`
+
 ## Create a CLI tools for a game of number picking.
 
 ![](https://raw.githubusercontent.com/Moanrisy/ssg/main/initial-concept.jpeg)
